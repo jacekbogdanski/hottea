@@ -5,7 +5,8 @@ var {
   acceptance,
   change,
   confirmation,
-  exclusion
+  exclusion,
+  inclusion
 } = require('../lib/validators')
 
 describe('required', function() {
@@ -183,6 +184,21 @@ describe('exclusion', function() {
     var changeset = createChangeset({ changes: { name: 'admin' } })
     expect(exclusion(['name'], reserved, changeset).errors).toEqual({
       name: ['is reserved']
+    })
+  })
+})
+
+describe('inclusion', function() {
+  var include = ['man', 'woman']
+  it('when change is included in given enumerable should pass', function() {
+    var changeset = createChangeset({ changes: { gender: 'man' } })
+    expect(inclusion(['gender'], include, changeset).errors).toEqual({})
+  })
+
+  it('when change is not included in given enumerable should give errors', function() {
+    var changeset = createChangeset({ changes: { gender: 'other' } })
+    expect(inclusion(['gender'], include, changeset).errors).toEqual({
+      gender: ['is invalid']
     })
   })
 })
