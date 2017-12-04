@@ -1,5 +1,5 @@
 var { createChangeset } = require('./helpers')
-var { required, length, acceptance } = require('../lib/validators')
+var { required, length, acceptance, change } = require('../lib/validators')
 
 describe('required', function() {
   var errors = ["can't be blank"]
@@ -122,5 +122,18 @@ describe('acceptance', function() {
     expect(() => acceptance(['1'], changeset)).toThrow()
     expect(() => acceptance(['2'], changeset)).toThrow()
     expect(() => acceptance(['3'], changeset)).toThrow()
+  })
+})
+
+describe('change', function() {
+  var notZero = x => (x == 0 ? ['error'] : [])
+  it('with empty array from validator should pass', function() {
+    var changeset = createChangeset({ changes: { 1: 10 } })
+    expect(change(notZero, ['1'], changeset).errors).toEqual({})
+  })
+
+  it('with errors from validator should give errors', function() {
+    var changeset = createChangeset({ changes: { 1: 0 } })
+    expect(change(notZero, ['1'], changeset).errors).toEqual({ 1: ['error'] })
   })
 })

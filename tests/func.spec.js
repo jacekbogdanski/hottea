@@ -1,4 +1,4 @@
-var { pick, getByPath } = require('../lib/func')
+var { pick, getByPath, isUndefined } = require('../lib/func')
 
 describe('pick', function() {
   it('should pick expected attributes', function() {
@@ -16,5 +16,17 @@ describe('getByPath', function() {
 
   it('with invalid path should give undefined', function() {
     expect(getByPath(['2', '3'], obj)).toEqual(undefined)
+  })
+})
+
+describe('isUndefined', function() {
+  it('with undefined gives thruthy', function() {
+    expect(isUndefined(undefined)).toBeTruthy()
+  })
+
+  it('without undefined gives falsy', function() {
+    expect(isUndefined(null)).toBeFalsy()
+    expect(isUndefined('string')).toBeFalsy()
+    expect(isUndefined(10)).toBeFalsy()
   })
 })
