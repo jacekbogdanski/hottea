@@ -4,7 +4,8 @@ var {
   length,
   acceptance,
   change,
-  confirmation
+  confirmation,
+  exclusion
 } = require('../lib/validators')
 
 describe('required', function() {
@@ -167,6 +168,21 @@ describe('confirmation', function() {
     expect(confirmation(['email', 'password'], changeset).errors).toEqual({
       email: errors,
       password: errors
+    })
+  })
+})
+
+describe('exclusion', function() {
+  var reserved = ['admin', 'superadmin']
+  it('when change is not included in given enumerable should pass', function() {
+    var changeset = createChangeset({ changes: { name: 'foo' } })
+    expect(exclusion(['name'], reserved, changeset).errors).toEqual({})
+  })
+
+  it('when change is included in given enumerable should give errors', function() {
+    var changeset = createChangeset({ changes: { name: 'admin' } })
+    expect(exclusion(['name'], reserved, changeset).errors).toEqual({
+      name: ['is reserved']
     })
   })
 })
