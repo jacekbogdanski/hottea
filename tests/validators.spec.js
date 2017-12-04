@@ -6,7 +6,8 @@ var {
   change,
   confirmation,
   exclusion,
-  inclusion
+  inclusion,
+  format
 } = require('../lib/validators')
 
 describe('required', function() {
@@ -199,6 +200,21 @@ describe('inclusion', function() {
     var changeset = createChangeset({ changes: { gender: 'other' } })
     expect(inclusion(['gender'], include, changeset).errors).toEqual({
       gender: ['is invalid']
+    })
+  })
+})
+
+describe('format', function() {
+  var regx = /@/
+  it('when change is in correct format should pass', function() {
+    var changeset = createChangeset({ changes: { email: 'email@email.com' } })
+    expect(format(['email'], regx, changeset).errors).toEqual({})
+  })
+
+  it('when change is not in correct format should give errors', function() {
+    var changeset = createChangeset({ changes: { email: 'invalid' } })
+    expect(format(['email'], regx, changeset).errors).toEqual({
+      email: ['has invalid format']
     })
   })
 })
