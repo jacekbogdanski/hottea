@@ -1,0 +1,15 @@
+{
+  "name": "jubjub",
+  "version": "0.0.1",
+  "description": "Model validation engine.",
+  "main": "index.js",
+  "author": "Jacek Bogdański <jacek@codepeak.io>",
+  "license": "MIT",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "eslint": "^4.12.1",
+    "jest": "^21.2.1"
+  }
+}
