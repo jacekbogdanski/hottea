@@ -1,5 +1,11 @@
 var { createChangeset } = require('./helpers')
-var { required, length, acceptance, change } = require('../lib/validators')
+var {
+  required,
+  length,
+  acceptance,
+  change,
+  confirmation
+} = require('../lib/validators')
 
 describe('required', function() {
   var errors = ["can't be blank"]
@@ -135,5 +141,32 @@ describe('change', function() {
   it('with errors from validator should give errors', function() {
     var changeset = createChangeset({ changes: { 1: 0 } })
     expect(change(notZero, ['1'], changeset).errors).toEqual({ 1: ['error'] })
+  })
+})
+
+describe('confirmation', function() {
+  it('with correct confirmation change will pass', function() {
+    var changeset = createChangeset({
+      changes: {
+        email: 'email@email.com',
+        emailConfirmation: 'email@email.com'
+      }
+    })
+    expect(confirmation(['email'], changeset).errors).toEqual({})
+  })
+
+  it('with invalid confirmation change will give errors', function() {
+    var changeset = createChangeset({
+      changes: {
+        email: 'email@email.com',
+        emailConfirmation: 'invalid@email.com',
+        password: 'password'
+      }
+    })
+    var errors = ['does not match']
+    expect(confirmation(['email', 'password'], changeset).errors).toEqual({
+      email: errors,
+      password: errors
+    })
   })
 })
