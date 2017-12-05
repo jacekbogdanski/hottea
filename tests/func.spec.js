@@ -85,6 +85,7 @@ describe('pipe', function() {
 
 describe('isEqual', function() {
   it('when values are equal should give truthy', function() {
+    expect(isEqual(new Date('2017-01-01'), new Date('2017-01-01'))).toBeTruthy()
     expect(isEqual(0, 0)).toBeTruthy()
     expect(isEqual(/@/, /@/)).toBeTruthy()
     expect(isEqual(null, null)).toBeTruthy()
@@ -99,6 +100,7 @@ describe('isEqual', function() {
   })
 
   it('when values are equal should give falsy', function() {
+    expect(isEqual(new Date('2017-01-01'), new Date('2017-01-02'))).toBeFalsy()
     expect(isEqual(0, 1)).toBeFalsy()
     expect(isEqual(/@/, /,/)).toBeFalsy()
     expect(isEqual(/@/, {})).toBeFalsy()
