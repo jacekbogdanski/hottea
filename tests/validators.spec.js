@@ -34,7 +34,7 @@ expect.extend({
 
     return {
       pass: false,
-      message: () => `expected valid to be truthy`
+      message: () => 'expected valid to be truthy'
     }
   },
   toBeInvalid(changeset, errors) {
@@ -61,7 +61,7 @@ expect.extend({
 
 describe('required', function() {
   var errors = ["can't be blank"]
-  var requiredValidator = required(['1'])
+  var requiredValidator = required({ fields: ['1'] })
 
   it('with data should pass', function() {
     var changeset = createChangeset({ data: { 1: 1 } })
@@ -91,7 +91,7 @@ describe('required', function() {
       }
     })
     expect(
-      required(['1', '2', '3', '4', '5', '6', '7'], changeset)
+      required({ fields: ['1', '2', '3', '4', '5', '6', '7'] }, changeset)
     ).toBeInvalid({ 5: errors, 7: errors })
   })
 })
@@ -104,9 +104,8 @@ describe('length', function() {
         2: [1, 2, 3]
       }
     })
-    var lengthValidator = length(3, 5)
-    expect(lengthValidator(['1'], changeset)).toBeValid()
-    expect(lengthValidator(['2'], changeset)).toBeValid()
+    expect(length({ fields: ['1'], min: 3, max: 5 }, changeset)).toBeValid()
+    expect(length({ fields: ['2'], min: 3, max: 5 }, changeset)).toBeValid()
   })
 
   it('with invalid change length should give errors', function() {
@@ -123,15 +122,15 @@ describe('length', function() {
       }
     })
 
-    expect(length(3, 3, ['1'], changeset)).toBeInvalid({
+    expect(length({ fields: ['1'], min: 3, max: 3 }, changeset)).toBeInvalid({
       1: stringErrors.is(3)
     })
 
-    expect(length(4, 10, ['1'], changeset)).toBeInvalid({
+    expect(length({ fields: ['1'], min: 4, max: 10 }, changeset)).toBeInvalid({
       1: stringErrors.min(4)
     })
 
-    expect(length(1, 2, ['1'], changeset)).toBeInvalid({
+    expect(length({ fields: ['1'], min: 1, max: 2 }, changeset)).toBeInvalid({
       1: stringErrors.max(2)
     })
 
@@ -141,49 +140,49 @@ describe('length', function() {
       max: x => [`should have at most ${x} items(s)`]
     }
 
-    expect(length(3, 3, ['2'], changeset)).toBeInvalid({
+    expect(length({ fields: ['2'], min: 3, max: 3 }, changeset)).toBeInvalid({
       2: arrayErrors.is(3)
     })
 
-    expect(length(4, 10, ['2'], changeset)).toBeInvalid({
+    expect(length({ fields: ['2'], min: 4, max: 10 }, changeset)).toBeInvalid({
       2: arrayErrors.min(4)
     })
 
-    expect(length(1, 2, ['2'], changeset)).toBeInvalid({
+    expect(length({ fields: ['2'], min: 1, max: 2 }, changeset)).toBeInvalid({
       2: arrayErrors.max(2)
     })
   })
 
   it('with invalid change type should throw', function() {
     var changeset = createChangeset({ changes: { 1: 1 } })
-    expect(() => length(2, 3, ['1'], changeset)).toThrow()
+    expect(() => length({ fields: ['1'], min: 2, max: 3 }, changeset)).toThrow()
   })
 })
 
 describe('acceptance', function() {
   it('with thruthy change should pass', function() {
     var changeset = createChangeset({ changes: { 1: true } })
-    expect(acceptance(['1'], changeset)).toBeValid()
+    expect(acceptance({ fields: ['1'] }, changeset)).toBeValid()
   })
 
   it('with falsy change should give errors', function() {
     var changeset = createChangeset({ changes: { 1: false } })
-    expect(acceptance(['1'], changeset)).toBeInvalid({
+    expect(acceptance({ fields: ['1'] }, changeset)).toBeInvalid({
       1: ['must be accepted']
     })
   })
 
   it('with invalid change type should throw', function() {
     var changeset = createChangeset({ changes: { 1: null, 2: 'string', 3: 4 } })
-    expect(() => acceptance(['1'], changeset)).toThrow()
-    expect(() => acceptance(['2'], changeset)).toThrow()
-    expect(() => acceptance(['3'], changeset)).toThrow()
+    expect(() => acceptance({ fields: ['1'] }, changeset)).toThrow()
+    expect(() => acceptance({ fields: ['2'] }, changeset)).toThrow()
+    expect(() => acceptance({ fields: ['3'] }, changeset)).toThrow()
   })
 })
 
 describe('change', function() {
   var notZero = x => (x == 0 ? ['error'] : [])
-  var changeValidator = change(notZero, ['1'])
+  var changeValidator = change({ fields: ['1'], validator: notZero })
 
   it('with empty array from validator should pass', function() {
     var changeset = createChangeset({ changes: { 1: 10 } })
@@ -204,7 +203,7 @@ describe('confirmation', function() {
         emailConfirmation: 'email@email.com'
       }
     })
-    expect(confirmation(['email'], changeset)).toBeValid()
+    expect(confirmation({ fields: ['email'] }, changeset)).toBeValid()
   })
 
   it('with invalid confirmation change will give errors', function() {
@@ -216,7 +215,9 @@ describe('confirmation', function() {
       }
     })
     var errors = ['does not match']
-    expect(confirmation(['email', 'password'], changeset)).toBeInvalid({
+    expect(
+      confirmation({ fields: ['email', 'password'] }, changeset)
+    ).toBeInvalid({
       email: errors,
       password: errors
     })
@@ -224,8 +225,10 @@ describe('confirmation', function() {
 })
 
 describe('exclusion', function() {
-  var reserved = ['admin', 'superadmin']
-  var exclusionValidator = exclusion(['name'], reserved)
+  var exclusionValidator = exclusion({
+    fields: ['name'],
+    reserved: ['admin', 'superadmin']
+  })
 
   it('when change is not included in given enumerable should pass', function() {
     var changeset = createChangeset({ changes: { name: 'foo' } })
@@ -241,8 +244,10 @@ describe('exclusion', function() {
 })
 
 describe('inclusion', function() {
-  var include = ['man', 'woman']
-  var inclusionValidator = inclusion(['gender'], include)
+  var inclusionValidator = inclusion({
+    fields: ['gender'],
+    include: ['man', 'woman']
+  })
 
   it('when change is included in given enumerable should pass', function() {
     var changeset = createChangeset({ changes: { gender: 'man' } })
@@ -258,8 +263,7 @@ describe('inclusion', function() {
 })
 
 describe('format', function() {
-  var regx = /@/
-  var formatValidator = format(['email'], regx)
+  var formatValidator = format({ fields: ['email'], match: /@/ })
   it('when change is in correct format should pass', function() {
     var changeset = createChangeset({ changes: { email: 'email@email.com' } })
     expect(formatValidator(changeset)).toBeValid()
@@ -277,29 +281,43 @@ describe('number', function() {
   var changeset = createChangeset({ changes: { count: 10 } })
 
   it('when change meet conditions should pass ', function() {
-    expect(lessThan(11, ['count'], changeset)).toBeValid()
-    expect(greaterThan(9, ['count'], changeset)).toBeValid()
-    expect(lessThanOrEqualTo(10, ['count'], changeset)).toBeValid()
-    expect(lessThanOrEqualTo(11, ['count'], changeset)).toBeValid()
-    expect(greaterThanOrEqualTo(10, ['count'], changeset)).toBeValid()
-    expect(greaterThanOrEqualTo(9, ['count'], changeset)).toBeValid()
-    expect(equalTo(10, ['count'], changeset)).toBeValid()
+    expect(lessThan({ fields: ['count'], number: 11 }, changeset)).toBeValid()
+    expect(greaterThan({ fields: ['count'], number: 9 }, changeset)).toBeValid()
+    expect(
+      lessThanOrEqualTo({ fields: ['count'], number: 10 }, changeset)
+    ).toBeValid()
+    expect(
+      lessThanOrEqualTo({ fields: ['count'], number: 11 }, changeset)
+    ).toBeValid()
+    expect(
+      greaterThanOrEqualTo({ fields: ['count'], number: 10 }, changeset)
+    ).toBeValid()
+    expect(
+      greaterThanOrEqualTo({ fields: ['count'], number: 9 }, changeset)
+    ).toBeValid()
+    expect(equalTo({ fields: ['count'], number: 10 }, changeset)).toBeValid()
   })
 
   it('when change does not meet conditions should give errors ', function() {
-    expect(lessThan(10, ['count'], changeset)).toBeInvalid({
+    expect(lessThan({ fields: ['count'], number: 10 }, changeset)).toBeInvalid({
       count: ['must be less than 10']
     })
-    expect(greaterThan(10, ['count'], changeset)).toBeInvalid({
+    expect(
+      greaterThan({ fields: ['count'], number: 10 }, changeset)
+    ).toBeInvalid({
       count: ['must be greater than 10']
     })
-    expect(lessThanOrEqualTo(9, ['count'], changeset)).toBeInvalid({
+    expect(
+      lessThanOrEqualTo({ fields: ['count'], number: 9 }, changeset)
+    ).toBeInvalid({
       count: ['must be less than or equal to 9']
     })
-    expect(greaterThanOrEqualTo(11, ['count'], changeset)).toBeInvalid({
+    expect(
+      greaterThanOrEqualTo({ fields: ['count'], number: 11 }, changeset)
+    ).toBeInvalid({
       count: ['must be greater than or equal to 11']
     })
-    expect(equalTo(11, ['count'], changeset)).toBeInvalid({
+    expect(equalTo({ fields: ['count'], number: 11 }, changeset)).toBeInvalid({
       count: ['must be equal to 11']
     })
   })
