@@ -1,4 +1,12 @@
-var { pick, getByPath, isUndefined, curry, mapObj } = require('../lib/func')
+var {
+  pick,
+  getByPath,
+  isUndefined,
+  curry,
+  mapObj,
+  compose,
+  pipe
+} = require('../lib/func')
 
 describe('pick', function() {
   it('should pick expected attributes', function() {
@@ -55,5 +63,20 @@ describe('mapObj', function() {
       b: 'bx',
       c: 'cx'
     })
+  })
+})
+
+var toUpper = x => x.toUpperCase()
+var identity = x => x
+
+describe('compose', function() {
+  it('should compose functions', function() {
+    expect(compose(toUpper, identity)('greetings')).toEqual('GREETINGS')
+  })
+})
+
+describe('pipe', function() {
+  it('should pipe functions', function() {
+    expect(pipe(identity, toUpper)('greetings')).toEqual('GREETINGS')
   })
 })
