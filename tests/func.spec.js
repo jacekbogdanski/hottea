@@ -5,7 +5,9 @@ var {
   curry,
   mapObj,
   compose,
-  pipe
+  pipe,
+  isEqual,
+  omit
 } = require('../lib/func')
 
 describe('pick', function() {
@@ -78,5 +80,41 @@ describe('compose', function() {
 describe('pipe', function() {
   it('should pipe functions', function() {
     expect(pipe(identity, toUpper)('greetings')).toEqual('GREETINGS')
+  })
+})
+
+describe('isEqual', function() {
+  it('when values are equal should give truthy', function() {
+    expect(isEqual(0, 0)).toBeTruthy()
+    expect(isEqual(/@/, /@/)).toBeTruthy()
+    expect(isEqual(null, null)).toBeTruthy()
+    expect(isEqual(undefined, undefined)).toBeTruthy()
+    expect(isEqual(1, 1)).toBeTruthy()
+    expect(isEqual('', '')).toBeTruthy()
+    expect(isEqual('str', 'str')).toBeTruthy()
+    expect(isEqual([], [])).toBeTruthy()
+    expect(isEqual([1, 2, 3], [1, 2, 3])).toBeTruthy()
+    expect(isEqual({}, {})).toBeTruthy()
+    expect(isEqual({ a: 1, b: { c: 2 } }, { a: 1, b: { c: 2 } })).toBeTruthy()
+  })
+
+  it('when values are equal should give falsy', function() {
+    expect(isEqual(0, 1)).toBeFalsy()
+    expect(isEqual(/@/, /,/)).toBeFalsy()
+    expect(isEqual(/@/, {})).toBeFalsy()
+    expect(isEqual(null, {})).toBeFalsy()
+    expect(isEqual('str', [1])).toBeFalsy()
+    expect(isEqual('', 'str')).toBeFalsy()
+    expect(isEqual([], [1])).toBeFalsy()
+    expect(isEqual([1, 2, 3], [3, 2, 1])).toBeFalsy()
+    expect(isEqual({ a: 1, b: { c: 3 } }, { a: 1, b: { c: 2 } })).toBeFalsy()
+  })
+})
+
+describe('omit', function() {
+  it('should omit expected attributes', function() {
+    var stub = { 1: 1, 2: 2, 3: 3, 4: 4 }
+    var result = omit(['2', '3', '5'], stub)
+    expect(result).toEqual({ 1: 1, 4: 4 })
   })
 })
