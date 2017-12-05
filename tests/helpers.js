@@ -6,8 +6,7 @@ module.exports = {
         data: {},
         changes: {},
         errors: {},
-        valid: true,
-        action: null
+        valid: true
       },
       obj
     )

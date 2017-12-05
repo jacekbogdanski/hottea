@@ -7,8 +7,7 @@ describe('cast', function() {
       data: { 1: 1, 2: 2 },
       changes: { 2: 2 },
       errors: {},
-      valid: true,
-      action: null
+      valid: true
     })
   })
 })
@@ -20,14 +19,12 @@ describe('merge', function() {
       data,
       changes: { title: 'title', body: 'body' },
       errors: { title: ['too short'], rules: ['error'] },
-      action: 'UPDATE',
       valid: false
     })
     var changeset2 = createChangeset({
       data,
       changes: { title: 'new title' },
       errors: { rules: ['error'] },
-      action: 'INSERT',
       valid: false
     })
 
@@ -35,7 +32,6 @@ describe('merge', function() {
       data: { id: 1 },
       changes: { title: 'new title', body: 'body' },
       errors: { rules: ['error'] },
-      action: 'INSERT',
       valid: false
     })
   })
