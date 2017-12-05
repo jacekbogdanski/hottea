@@ -1,4 +1,4 @@
-var { pick, getByPath, isUndefined } = require('../lib/func')
+var { pick, getByPath, isUndefined, curry, mapObj } = require('../lib/func')
 
 describe('pick', function() {
   it('should pick expected attributes', function() {
@@ -28,5 +28,32 @@ describe('isUndefined', function() {
     expect(isUndefined(null)).toBeFalsy()
     expect(isUndefined('string')).toBeFalsy()
     expect(isUndefined(10)).toBeFalsy()
+  })
+})
+
+describe('curry', function() {
+  var fn = function(x, y, z) {
+    return x + y + z
+  }
+  it('should curry function params', function() {
+    var curried = curry(fn)
+    expect(() => curried('x')).not.toThrow()
+    expect(() => curried('x', 'y')).not.toThrow()
+    expect(() => curried('x', 'y', 'z')).not.toThrow()
+    expect(curried('x', 'y', 'z')).toEqual('xyz')
+    expect(() => curried('x')('y')).not.toThrow()
+    expect(() => curried('x')('y')('z')).not.toThrow()
+    expect(curried('x')('y')('z')).toEqual('xyz')
+  })
+})
+
+describe('mapObj', function() {
+  it('should map by object attributes', function() {
+    var obj = { a: 'x', b: 'x', c: 'x' }
+    expect(mapObj(obj, (key, value) => key + value)).toEqual({
+      a: 'ax',
+      b: 'bx',
+      c: 'cx'
+    })
   })
 })

@@ -57,20 +57,21 @@ expect.extend({
 
 describe('required', function() {
   var errors = ["can't be blank"]
+  var requiredValidator = required(['1'])
 
   it('with data should pass', function() {
     var changeset = createChangeset({ data: { 1: 1 } })
-    expect(required(['1'], changeset)).toBeValid()
+    expect(requiredValidator(changeset)).toBeValid()
   })
 
   it('with change should pass', function() {
     var changeset = createChangeset({ changes: { 1: 1 } })
-    expect(required(['1'], changeset)).toBeValid()
+    expect(requiredValidator(changeset)).toBeValid()
   })
 
   it('without data and change should give error', function() {
     var changeset = createChangeset()
-    expect(required(['1'], changeset)).toBeInvalid({ 1: errors })
+    expect(requiredValidator(changeset)).toBeInvalid({ 1: errors })
   })
 
   it('should work with different data sources', function() {
@@ -99,8 +100,9 @@ describe('length', function() {
         2: [1, 2, 3]
       }
     })
-    expect(length(3, 5, ['1'], changeset)).toBeValid()
-    expect(length(3, 5, ['2'], changeset)).toBeValid()
+    var lengthValidator = length(3, 5)
+    expect(lengthValidator(['1'], changeset)).toBeValid()
+    expect(lengthValidator(['2'], changeset)).toBeValid()
   })
 
   it('with invalid change length should give errors', function() {
@@ -177,14 +179,16 @@ describe('acceptance', function() {
 
 describe('change', function() {
   var notZero = x => (x == 0 ? ['error'] : [])
+  var changeValidator = change(notZero, ['1'])
+
   it('with empty array from validator should pass', function() {
     var changeset = createChangeset({ changes: { 1: 10 } })
-    expect(change(notZero, ['1'], changeset)).toBeValid()
+    expect(changeValidator(changeset)).toBeValid()
   })
 
   it('with errors from validator should give errors', function() {
     var changeset = createChangeset({ changes: { 1: 0 } })
-    expect(change(notZero, ['1'], changeset)).toBeInvalid({ 1: ['error'] })
+    expect(changeValidator(changeset)).toBeInvalid({ 1: ['error'] })
   })
 })
 
@@ -217,14 +221,16 @@ describe('confirmation', function() {
 
 describe('exclusion', function() {
   var reserved = ['admin', 'superadmin']
+  var exclusionValidator = exclusion(['name'], reserved)
+
   it('when change is not included in given enumerable should pass', function() {
     var changeset = createChangeset({ changes: { name: 'foo' } })
-    expect(exclusion(['name'], reserved, changeset)).toBeValid()
+    expect(exclusionValidator(changeset)).toBeValid()
   })
 
   it('when change is included in given enumerable should give errors', function() {
     var changeset = createChangeset({ changes: { name: 'admin' } })
-    expect(exclusion(['name'], reserved, changeset)).toBeInvalid({
+    expect(exclusionValidator(changeset)).toBeInvalid({
       name: ['is reserved']
     })
   })
@@ -232,14 +238,16 @@ describe('exclusion', function() {
 
 describe('inclusion', function() {
   var include = ['man', 'woman']
+  var inclusionValidator = inclusion(['gender'], include)
+
   it('when change is included in given enumerable should pass', function() {
     var changeset = createChangeset({ changes: { gender: 'man' } })
-    expect(inclusion(['gender'], include, changeset)).toBeValid()
+    expect(inclusionValidator(changeset)).toBeValid()
   })
 
   it('when change is not included in given enumerable should give errors', function() {
     var changeset = createChangeset({ changes: { gender: 'other' } })
-    expect(inclusion(['gender'], include, changeset)).toBeInvalid({
+    expect(inclusionValidator(changeset)).toBeInvalid({
       gender: ['is invalid']
     })
   })
@@ -247,14 +255,15 @@ describe('inclusion', function() {
 
 describe('format', function() {
   var regx = /@/
+  var formatValidator = format(['email'], regx)
   it('when change is in correct format should pass', function() {
     var changeset = createChangeset({ changes: { email: 'email@email.com' } })
-    expect(format(['email'], regx, changeset)).toBeValid()
+    expect(formatValidator(changeset)).toBeValid()
   })
 
   it('when change is not in correct format should give errors', function() {
     var changeset = createChangeset({ changes: { email: 'invalid' } })
-    expect(format(['email'], regx, changeset)).toBeInvalid({
+    expect(formatValidator(changeset)).toBeInvalid({
       email: ['has invalid format']
     })
   })
@@ -262,48 +271,37 @@ describe('format', function() {
 
 describe('number', function() {
   var changeset = createChangeset({ changes: { count: 10 } })
+
+  var lessThan = number('less than')
+  var greaterThan = number('greater than')
+  var lessThanOrEqualTo = number('less than or equal to')
+  var greaterThanOrEqualTo = number('greater than or equal to')
+  var equalTo = number('equal to')
+
   it('when change meet conditions should pass ', function() {
-    // less than
-    expect(number('less than', 11, ['count'], changeset)).toBeValid()
-    // greater than
-    expect(number('greater than', 9, ['count'], changeset)).toBeValid()
-    // less than or equal to
-    expect(
-      number('less than or equal to', 10, ['count'], changeset)
-    ).toBeValid()
-    expect(
-      number('less than or equal to', 11, ['count'], changeset)
-    ).toBeValid()
-    // greater than or equal to
-    expect(
-      number('greater than or equal to', 10, ['count'], changeset)
-    ).toBeValid()
-    expect(
-      number('greater than or equal to', 9, ['count'], changeset)
-    ).toBeValid()
-    // equal to
-    expect(number('equal to', 10, ['count'], changeset)).toBeValid()
+    expect(lessThan(11, ['count'], changeset)).toBeValid()
+    expect(greaterThan(9, ['count'], changeset)).toBeValid()
+    expect(lessThanOrEqualTo(10, ['count'], changeset)).toBeValid()
+    expect(lessThanOrEqualTo(11, ['count'], changeset)).toBeValid()
+    expect(greaterThanOrEqualTo(10, ['count'], changeset)).toBeValid()
+    expect(greaterThanOrEqualTo(9, ['count'], changeset)).toBeValid()
+    expect(equalTo(10, ['count'], changeset)).toBeValid()
   })
 
   it('when change does not meet conditions should give errors ', function() {
-    // less than
-    expect(number('less than', 10, ['count'], changeset)).toBeInvalid({
+    expect(lessThan(10, ['count'], changeset)).toBeInvalid({
       count: ['must be less than 10']
     })
-    // greater than
-    expect(number('greater than', 10, ['count'], changeset)).toBeInvalid({
+    expect(greaterThan(10, ['count'], changeset)).toBeInvalid({
       count: ['must be greater than 10']
     })
-    // less than or equal to
-    expect(
-      number('less than or equal to', 9, ['count'], changeset)
-    ).toBeInvalid({ count: ['must be less than or equal to 9'] })
-    // greater than or equal to
-    expect(
-      number('greater than or equal to', 11, ['count'], changeset)
-    ).toBeInvalid({ count: ['must be greater than or equal to 11'] })
-    // equal to
-    expect(number('equal to', 11, ['count'], changeset)).toBeInvalid({
+    expect(lessThanOrEqualTo(9, ['count'], changeset)).toBeInvalid({
+      count: ['must be less than or equal to 9']
+    })
+    expect(greaterThanOrEqualTo(11, ['count'], changeset)).toBeInvalid({
+      count: ['must be greater than or equal to 11']
+    })
+    expect(equalTo(11, ['count'], changeset)).toBeInvalid({
       count: ['must be equal to 11']
     })
   })
