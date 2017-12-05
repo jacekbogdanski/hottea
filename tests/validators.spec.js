@@ -8,7 +8,8 @@ var {
   confirmation,
   exclusion,
   inclusion,
-  format
+  format,
+  number
 } = require('../lib/validators')
 
 expect.extend({
@@ -255,6 +256,55 @@ describe('format', function() {
     var changeset = createChangeset({ changes: { email: 'invalid' } })
     expect(format(['email'], regx, changeset)).toBeInvalid({
       email: ['has invalid format']
+    })
+  })
+})
+
+describe('number', function() {
+  var changeset = createChangeset({ changes: { count: 10 } })
+  it('when change meet conditions should pass ', function() {
+    // less than
+    expect(number('less than', 11, ['count'], changeset)).toBeValid()
+    // greater than
+    expect(number('greater than', 9, ['count'], changeset)).toBeValid()
+    // less than or equal to
+    expect(
+      number('less than or equal to', 10, ['count'], changeset)
+    ).toBeValid()
+    expect(
+      number('less than or equal to', 11, ['count'], changeset)
+    ).toBeValid()
+    // greater than or equal to
+    expect(
+      number('greater than or equal to', 10, ['count'], changeset)
+    ).toBeValid()
+    expect(
+      number('greater than or equal to', 9, ['count'], changeset)
+    ).toBeValid()
+    // equal to
+    expect(number('equal to', 10, ['count'], changeset)).toBeValid()
+  })
+
+  it('when change does not meet conditions should give errors ', function() {
+    // less than
+    expect(number('less than', 10, ['count'], changeset)).toBeInvalid({
+      count: ['must be less than 10']
+    })
+    // greater than
+    expect(number('greater than', 10, ['count'], changeset)).toBeInvalid({
+      count: ['must be greater than 10']
+    })
+    // less than or equal to
+    expect(
+      number('less than or equal to', 9, ['count'], changeset)
+    ).toBeInvalid({ count: ['must be less than or equal to 9'] })
+    // greater than or equal to
+    expect(
+      number('greater than or equal to', 11, ['count'], changeset)
+    ).toBeInvalid({ count: ['must be greater than or equal to 11'] })
+    // equal to
+    expect(number('equal to', 11, ['count'], changeset)).toBeInvalid({
+      count: ['must be equal to 11']
     })
   })
 })
