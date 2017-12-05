@@ -9,7 +9,11 @@ var {
   exclusion,
   inclusion,
   format,
-  number
+  lessThan,
+  greaterThan,
+  lessThanOrEqualTo,
+  greaterThanOrEqualTo,
+  equalTo
 } = require('../lib/validators')
 
 expect.extend({
@@ -50,7 +54,7 @@ expect.extend({
 
     return {
       pass: false,
-      message: () => `expected valid to be falsy`
+      message: () => 'expected valid to be falsy'
     }
   }
 })
@@ -271,12 +275,6 @@ describe('format', function() {
 
 describe('number', function() {
   var changeset = createChangeset({ changes: { count: 10 } })
-
-  var lessThan = number('less than')
-  var greaterThan = number('greater than')
-  var lessThanOrEqualTo = number('less than or equal to')
-  var greaterThanOrEqualTo = number('greater than or equal to')
-  var equalTo = number('equal to')
 
   it('when change meet conditions should pass ', function() {
     expect(lessThan(11, ['count'], changeset)).toBeValid()
