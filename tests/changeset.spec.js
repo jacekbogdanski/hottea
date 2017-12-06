@@ -2,8 +2,10 @@ var { createChangeset } = require('./helpers')
 var {
   cast,
   getChange,
+  putChange,
   getData,
   putError,
+  getErrors,
   merge,
   view
 } = require('../lib/changeset')
@@ -69,6 +71,28 @@ describe('getChange', function() {
   })
 })
 
+describe('putChange', function() {
+  it('should put change into changeset', function() {
+    expect(
+      putChange(
+        'title',
+        'new title',
+        createChangeset({ changes: { body: 'body' } })
+      )
+    ).toEqual(
+      createChangeset({ changes: { title: 'new title', body: 'body' } })
+    )
+
+    expect(
+      putChange(
+        'title',
+        'new title',
+        createChangeset({ changes: { title: 'title' } })
+      )
+    ).toEqual(createChangeset({ changes: { title: 'new title' } }))
+  })
+})
+
 describe('getData', function() {
   it('with data should give data from changeset', function() {
     var changeset = createChangeset({ data: { data: 'data' } })
@@ -78,6 +102,18 @@ describe('getData', function() {
   it('without data should give nothing', function() {
     var changeset = createChangeset()
     expect(getData('data', changeset)).toEqual(undefined)
+  })
+})
+
+describe('getErrors', function() {
+  it('with errors should give errors from changeset', function() {
+    var changeset = createChangeset({ errors: { title: ['invalid'] } })
+    expect(getErrors('title', changeset)).toEqual(['invalid'])
+  })
+
+  it('without errors should give nothing', function() {
+    var changeset = createChangeset()
+    expect(getErrors('title', changeset)).toEqual([])
   })
 })
 
