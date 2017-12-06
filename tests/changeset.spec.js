@@ -3,9 +3,15 @@ var { cast, getChange, getData, putError, merge } = require('../lib/changeset')
 
 describe('cast', function() {
   it('should give correct changeset', function() {
-    expect(cast({ 1: 1, 2: 2 }, { 2: 2, 3: 3 }, ['1', '2'])).toEqual({
-      data: { 1: 1, 2: 2 },
-      changes: { 2: 2 },
+    expect(
+      cast(
+        { username: 'jacek', email: 'old@email.com' },
+        { email: 'new@email.com', invalid: 'invalid' },
+        ['username', 'email']
+      )
+    ).toEqual({
+      data: { username: 'jacek', email: 'old@email.com' },
+      changes: { email: 'new@email.com' },
       errors: {},
       valid: true
     })
@@ -46,33 +52,33 @@ describe('merge', function() {
 
 describe('getChange', function() {
   it('with change should give change from changeset', function() {
-    var changeset = createChangeset({ changes: { 1: 'change' } })
-    expect(getChange('1', changeset)).toEqual('change')
+    var changeset = createChangeset({ changes: { change: 'change' } })
+    expect(getChange('change', changeset)).toEqual('change')
   })
 
   it('without change should give nothing', function() {
     var changeset = createChangeset()
-    expect(getChange('1', changeset)).toEqual(undefined)
+    expect(getChange('change', changeset)).toEqual(undefined)
   })
 })
 
 describe('getData', function() {
   it('with data should give data from changeset', function() {
-    var changeset = createChangeset({ data: { 1: 'data' } })
-    expect(getData('1', changeset)).toEqual('data')
+    var changeset = createChangeset({ data: { data: 'data' } })
+    expect(getData('data', changeset)).toEqual('data')
   })
 
   it('without data should give nothing', function() {
     var changeset = createChangeset()
-    expect(getData('1', changeset)).toEqual(undefined)
+    expect(getData('data', changeset)).toEqual(undefined)
   })
 })
 
 describe('putError', function() {
   it('should put error into changeset', function() {
     var changeset = createChangeset()
-    expect(putError('1', 'error', changeset)).toEqual(
-      createChangeset({ errors: { 1: ['error'] }, valid: false })
+    expect(putError('change', 'error', changeset)).toEqual(
+      createChangeset({ errors: { change: ['error'] }, valid: false })
     )
   })
 })
