@@ -8,7 +8,7 @@ var {
   pipe,
   isEqual,
   omit
-} = require('../lib/func')
+} = require('../lib/utils')
 
 describe('pick', function() {
   it('should pick expected attributes', function() {
