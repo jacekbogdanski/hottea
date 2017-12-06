@@ -61,38 +61,58 @@ expect.extend({
 
 describe('required', function() {
   var errors = ["can't be blank"]
-  var requiredValidator = required({ fields: ['1'] })
+  var requiredValidator = required({ fields: ['username'] })
 
   it('with data should pass', function() {
-    var changeset = createChangeset({ data: { 1: 1 } })
+    var changeset = createChangeset({ data: { username: 'jacek' } })
     expect(requiredValidator(changeset)).toBeValid()
   })
 
   it('with change should pass', function() {
-    var changeset = createChangeset({ changes: { 1: 1 } })
+    var changeset = createChangeset({ changes: { username: 'jacek' } })
     expect(requiredValidator(changeset)).toBeValid()
   })
 
   it('without data and change should give error', function() {
     var changeset = createChangeset()
-    expect(requiredValidator(changeset)).toBeInvalid({ 1: errors })
+    expect(requiredValidator(changeset)).toBeInvalid({ username: errors })
   })
 
   it('should work with different data sources', function() {
     var changeset = createChangeset({
       data: {
-        1: 'string',
-        2: 0,
-        3: false,
-        4: {},
-        5: '  ',
-        6: null,
-        7: undefined
+        string: 'string',
+        zero: 0,
+        bool: false,
+        obj: {},
+        emptyString: '  ',
+        null: null,
+        undefined: undefined
       }
     })
     expect(
-      required({ fields: ['1', '2', '3', '4', '5', '6', '7'] }, changeset)
-    ).toBeInvalid({ 5: errors, 7: errors })
+      required(
+        {
+          fields: [
+            'string',
+            'zero',
+            'bool',
+            'obj',
+            'emptyString',
+            'null',
+            'undefined'
+          ]
+        },
+        changeset
+      )
+    ).toBeInvalid({ emptyString: errors, undefined: errors })
+  })
+
+  it('should allow for custom error message', function() {
+    var changeset = createChangeset()
+    expect(
+      required({ fields: ['email'], message: 'email is required' }, changeset)
+    ).toBeInvalid({ email: ['email is required'] })
   })
 })
 
@@ -100,12 +120,14 @@ describe('length', function() {
   it('with correct change length should pass', function() {
     var changeset = createChangeset({
       changes: {
-        1: '123',
-        2: [1, 2, 3]
+        string: '123',
+        array: [1, 2, 3]
       }
     })
-    expect(length({ fields: ['1'], min: 3, max: 5 }, changeset)).toBeValid()
-    expect(length({ fields: ['2'], min: 3, max: 5 }, changeset)).toBeValid()
+    expect(
+      length({ fields: ['string'], min: 3, max: 5 }, changeset)
+    ).toBeValid()
+    expect(length({ fields: ['array'], min: 3, max: 5 }, changeset)).toBeValid()
   })
 
   it('with invalid change length should give errors', function() {
@@ -117,21 +139,27 @@ describe('length', function() {
 
     var changeset = createChangeset({
       changes: {
-        1: '123',
-        2: [1, 2, 3]
+        string: '123',
+        array: [1, 2, 3]
       }
     })
 
-    expect(length({ fields: ['1'], min: 3, max: 3 }, changeset)).toBeInvalid({
-      1: stringErrors.is(3)
+    expect(
+      length({ fields: ['string'], min: 3, max: 3 }, changeset)
+    ).toBeInvalid({
+      string: stringErrors.is(3)
     })
 
-    expect(length({ fields: ['1'], min: 4, max: 10 }, changeset)).toBeInvalid({
-      1: stringErrors.min(4)
+    expect(
+      length({ fields: ['string'], min: 4, max: 10 }, changeset)
+    ).toBeInvalid({
+      string: stringErrors.min(4)
     })
 
-    expect(length({ fields: ['1'], min: 1, max: 2 }, changeset)).toBeInvalid({
-      1: stringErrors.max(2)
+    expect(
+      length({ fields: ['string'], min: 1, max: 2 }, changeset)
+    ).toBeInvalid({
+      string: stringErrors.max(2)
     })
 
     var arrayErrors = {
@@ -140,58 +168,127 @@ describe('length', function() {
       max: x => [`should have at most ${x} items(s)`]
     }
 
-    expect(length({ fields: ['2'], min: 3, max: 3 }, changeset)).toBeInvalid({
-      2: arrayErrors.is(3)
+    expect(
+      length({ fields: ['array'], min: 3, max: 3 }, changeset)
+    ).toBeInvalid({
+      array: arrayErrors.is(3)
     })
 
-    expect(length({ fields: ['2'], min: 4, max: 10 }, changeset)).toBeInvalid({
-      2: arrayErrors.min(4)
+    expect(
+      length({ fields: ['array'], min: 4, max: 10 }, changeset)
+    ).toBeInvalid({
+      array: arrayErrors.min(4)
     })
 
-    expect(length({ fields: ['2'], min: 1, max: 2 }, changeset)).toBeInvalid({
-      2: arrayErrors.max(2)
+    expect(
+      length({ fields: ['array'], min: 1, max: 2 }, changeset)
+    ).toBeInvalid({
+      array: arrayErrors.max(2)
     })
   })
 
   it('with invalid change type should throw', function() {
-    var changeset = createChangeset({ changes: { 1: 1 } })
-    expect(() => length({ fields: ['1'], min: 2, max: 3 }, changeset)).toThrow()
+    var changeset = createChangeset({
+      changes: { object: {}, number: 12, regex: /@/ }
+    })
+    expect(() =>
+      length({ fields: ['object'], min: 2, max: 3 }, changeset)
+    ).toThrow()
+    expect(() =>
+      length({ fields: ['number'], min: 2, max: 3 }, changeset)
+    ).toThrow()
+    expect(() =>
+      length({ fields: ['regex'], min: 2, max: 3 }, changeset)
+    ).toThrow()
+  })
+
+  it('should allow for custom error message', function() {
+    var changeset = createChangeset({
+      changes: {
+        username: 'joe'
+      }
+    })
+
+    var message = {
+      is: x => `is error for ${x}`,
+      min: x => `min error for ${x}`,
+      max: x => `max error for ${x}`
+    }
+
+    expect(
+      length(
+        { fields: ['username'], min: 3, max: 3, message: message },
+        changeset
+      )
+    ).toBeInvalid({
+      username: [message.is(3)]
+    })
+
+    expect(
+      length(
+        { fields: ['username'], min: 4, max: 10, message: message },
+        changeset
+      )
+    ).toBeInvalid({
+      username: [message.min(4)]
+    })
+
+    expect(
+      length(
+        { fields: ['username'], min: 1, max: 2, message: message },
+        changeset
+      )
+    ).toBeInvalid({
+      username: [message.max(2)]
+    })
   })
 })
 
 describe('acceptance', function() {
   it('with thruthy change should pass', function() {
-    var changeset = createChangeset({ changes: { 1: true } })
-    expect(acceptance({ fields: ['1'] }, changeset)).toBeValid()
+    var changeset = createChangeset({ changes: { rules: true } })
+    expect(acceptance({ fields: ['rules'] }, changeset)).toBeValid()
   })
 
   it('with falsy change should give errors', function() {
-    var changeset = createChangeset({ changes: { 1: false } })
-    expect(acceptance({ fields: ['1'] }, changeset)).toBeInvalid({
-      1: ['must be accepted']
+    var changeset = createChangeset({ changes: { rules: false } })
+    expect(acceptance({ fields: ['rules'] }, changeset)).toBeInvalid({
+      rules: ['must be accepted']
     })
   })
 
   it('with invalid change type should throw', function() {
-    var changeset = createChangeset({ changes: { 1: null, 2: 'string', 3: 4 } })
-    expect(() => acceptance({ fields: ['1'] }, changeset)).toThrow()
-    expect(() => acceptance({ fields: ['2'] }, changeset)).toThrow()
-    expect(() => acceptance({ fields: ['3'] }, changeset)).toThrow()
+    var changeset = createChangeset({
+      changes: { null: null, string: 'string', number: 4, object: {} }
+    })
+    expect(() => acceptance({ fields: ['null'] }, changeset)).toThrow()
+    expect(() => acceptance({ fields: ['string'] }, changeset)).toThrow()
+    expect(() => acceptance({ fields: ['number'] }, changeset)).toThrow()
+    expect(() => acceptance({ fields: ['object'] }, changeset)).toThrow()
+  })
+
+  it('should allow for custom error message', function() {
+    var changeset = createChangeset({ changes: { rules: false } })
+    expect(
+      acceptance({ fields: ['rules'], message: 'accept the rules' }, changeset)
+    ).toBeInvalid({
+      rules: ['accept the rules']
+    })
   })
 })
 
 describe('change', function() {
   var notZero = x => (x == 0 ? ['error'] : [])
-  var changeValidator = change({ fields: ['1'], validator: notZero })
+  var changeValidator = change({ fields: ['count'], validator: notZero })
 
   it('with empty array from validator should pass', function() {
-    var changeset = createChangeset({ changes: { 1: 10 } })
+    var changeset = createChangeset({ changes: { count: 10 } })
     expect(changeValidator(changeset)).toBeValid()
   })
 
   it('with errors from validator should give errors', function() {
-    var changeset = createChangeset({ changes: { 1: 0 } })
-    expect(changeValidator(changeset)).toBeInvalid({ 1: ['error'] })
+    var changeset = createChangeset({ changes: { count: 0 } })
+    expect(changeValidator(changeset)).toBeInvalid({ count: ['error'] })
   })
 })
 
@@ -222,6 +319,21 @@ describe('confirmation', function() {
       password: errors
     })
   })
+
+  it('should allow for custom error message', function() {
+    var changeset = createChangeset({
+      changes: {
+        password: 'password'
+      }
+    })
+    var message = 'password does not match'
+
+    expect(
+      confirmation({ fields: ['password'], message }, changeset)
+    ).toBeInvalid({
+      password: [message]
+    })
+  })
 })
 
 describe('exclusion', function() {
@@ -241,12 +353,23 @@ describe('exclusion', function() {
       name: ['is reserved']
     })
   })
+
+  it('should allow for custom error message', function() {
+    var changeset = createChangeset({ changes: { name: 'admin' } })
+    var message = 'admin is reserved'
+    expect(
+      exclusion({ fields: ['name'], reserved: ['admin'], message }, changeset)
+    ).toBeInvalid({
+      name: [message]
+    })
+  })
 })
 
 describe('inclusion', function() {
+  var include = ['man', 'woman']
   var inclusionValidator = inclusion({
     fields: ['gender'],
-    include: ['man', 'woman']
+    include
   })
 
   it('when change is included in given enumerable should pass', function() {
@@ -260,10 +383,22 @@ describe('inclusion', function() {
       gender: ['is invalid']
     })
   })
+
+  it('when change is not included in given enumerable should give errors', function() {
+    var changeset = createChangeset({ changes: { gender: 'other' } })
+    var message = 'man or woman'
+    expect(
+      inclusion({ fields: ['gender'], include, message }, changeset)
+    ).toBeInvalid({
+      gender: [message]
+    })
+  })
 })
 
 describe('format', function() {
-  var formatValidator = format({ fields: ['email'], match: /@/ })
+  var opts = { fields: ['email'], match: /@/ }
+  var formatValidator = format(opts)
+
   it('when change is in correct format should pass', function() {
     var changeset = createChangeset({ changes: { email: 'email@email.com' } })
     expect(formatValidator(changeset)).toBeValid()
@@ -274,6 +409,16 @@ describe('format', function() {
     expect(formatValidator(changeset)).toBeInvalid({
       email: ['has invalid format']
     })
+  })
+
+  it('should allow for custom error message', function() {
+    var changeset = createChangeset({ changes: { email: 'invalid' } })
+    var message = 'invalid email'
+    expect(format(Object.assign({}, opts, { message }), changeset)).toBeInvalid(
+      {
+        email: [message]
+      }
+    )
   })
 })
 
@@ -319,6 +464,38 @@ describe('number', function() {
     })
     expect(equalTo({ fields: ['count'], number: 11 }, changeset)).toBeInvalid({
       count: ['must be equal to 11']
+    })
+  })
+
+  it('should allow for custom error message', function() {
+    var message = 'invalid count'
+    expect(
+      lessThan({ fields: ['count'], number: 10, message }, changeset)
+    ).toBeInvalid({
+      count: [message]
+    })
+    expect(
+      greaterThan({ fields: ['count'], number: 10, message }, changeset)
+    ).toBeInvalid({
+      count: [message]
+    })
+    expect(
+      lessThanOrEqualTo({ fields: ['count'], number: 9, message }, changeset)
+    ).toBeInvalid({
+      count: [message]
+    })
+    expect(
+      greaterThanOrEqualTo(
+        { fields: ['count'], number: 11, message },
+        changeset
+      )
+    ).toBeInvalid({
+      count: [message]
+    })
+    expect(
+      equalTo({ fields: ['count'], number: 11, message }, changeset)
+    ).toBeInvalid({
+      count: [message]
     })
   })
 })
