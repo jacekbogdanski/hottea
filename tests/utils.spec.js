@@ -7,7 +7,8 @@ var {
   compose,
   pipe,
   isEqual,
-  omit
+  omit,
+  unique
 } = require('../lib/utils')
 
 describe('pick', function() {
@@ -118,5 +119,11 @@ describe('omit', function() {
     var stub = { 1: 1, 2: 2, 3: 3, 4: 4 }
     var result = omit(['2', '3', '5'], stub)
     expect(result).toEqual({ 1: 1, 4: 4 })
+  })
+})
+
+describe('unique', function() {
+  it('should give array with unique values', function() {
+    expect(unique([1, 1, 2, 3, 3, 4])).toEqual([1, 2, 3, 4])
   })
 })

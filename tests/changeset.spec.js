@@ -1,5 +1,12 @@
 var { createChangeset } = require('./helpers')
-var { cast, getChange, getData, putError, merge } = require('../lib/changeset')
+var {
+  cast,
+  getChange,
+  getData,
+  putError,
+  merge,
+  view
+} = require('../lib/changeset')
 
 describe('cast', function() {
   it('should give correct changeset', function() {
@@ -80,5 +87,70 @@ describe('putError', function() {
     expect(putError('change', 'error', changeset)).toEqual(
       createChangeset({ errors: { change: ['error'] }, valid: false })
     )
+  })
+})
+
+describe('view', function() {
+  it('should give correct changeset view', function() {
+    expect(
+      view(
+        createChangeset({
+          data: { id: 1, title: 'old title' },
+          changes: { title: 'new title' },
+          errors: {}
+        })
+      )
+    ).toEqual({
+      id: { value: 1, errors: [] },
+      title: { value: 'new title', errors: [] },
+      __valid__: true
+    })
+
+    expect(
+      view(
+        createChangeset({
+          data: { id: 1, title: 'old title', author: 'jacek' },
+          changes: { title: 'new title' },
+          errors: { body: ['is required'] },
+          valid: false
+        })
+      )
+    ).toEqual({
+      id: { value: 1, errors: [] },
+      title: { value: 'new title', errors: [] },
+      body: { value: null, errors: ['is required'] },
+      author: { value: 'jacek', errors: [] },
+      __valid__: false
+    })
+
+    expect(
+      view(
+        createChangeset({
+          data: { id: 1, title: 'title' },
+          changes: { body: 'body' },
+          errors: {}
+        }),
+        ['title', 'body']
+      )
+    ).toEqual({
+      title: { value: 'title', errors: [] },
+      body: { value: 'body', errors: [] },
+      __valid__: true
+    })
+
+    expect(
+      view(
+        createChangeset({
+          data: { id: 1, title: 'old title' },
+          changes: { title: 'new title', body: 'body' },
+          errors: { body: ['too short'] },
+          valid: false
+        }),
+        ['title']
+      )
+    ).toEqual({
+      title: { value: 'new title', errors: [] },
+      __valid__: false
+    })
   })
 })
