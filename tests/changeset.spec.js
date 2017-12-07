@@ -88,13 +88,13 @@ describe('castAssoc', function() {
 
 describe('traverseErrors', function() {
   var changeset = createChangeset({
-    errors: { username: ['required'] },
+    errors: { username: [{ message: 'required' }] },
     valid: false,
     changes: {
       username: null,
       address: createChangeset({
         changes: { city: 'n' },
-        errors: { city: ['too short'] },
+        errors: { city: [{ message: 'too short' }] },
         valid: false
       })
     }
@@ -109,7 +109,7 @@ describe('traverseErrors', function() {
 
   it('with callback should give formatted errors from changeset and associations', function() {
     expect(
-      traverseErrors(changeset, (field, error) => `${field}: ${error}`)
+      traverseErrors(changeset, (field, error) => `${field}: ${error.message}`)
     ).toEqual({
       username: ['username: required'],
       address: { city: ['city: too short'] }
