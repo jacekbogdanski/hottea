@@ -7,8 +7,11 @@ var {
   putError,
   getErrors,
   merge,
-  view
+  view,
+  castAssoc
 } = require('../lib/changeset')
+
+var { required } = require('../lib/validators')
 
 describe('cast', function() {
   it('should give correct changeset', function() {
@@ -24,6 +27,61 @@ describe('cast', function() {
       errors: {},
       valid: true
     })
+  })
+})
+
+describe('castAssoc', function() {
+  var changeAddress = function(data, attrs) {
+    var fields = ['line', 'city']
+    return required({ fields, message: 'error' }, cast(data, attrs, fields))
+  }
+  var address = { line: '123 Main St', city: 'New York' }
+  var newAddress = { line: '456 Main St', city: 'New York' }
+  var changeset = createChangeset({ data: { address } })
+
+  it('should give correct changeset', function() {
+    expect(
+      castAssoc({ change: changeAddress, field: 'address' }, {}, changeset)
+    ).toEqual(changeset)
+
+    expect(
+      castAssoc(
+        { change: changeAddress, field: 'address' },
+        newAddress,
+        changeset
+      )
+    ).toEqual(
+      createChangeset({
+        data: { address },
+        changes: {
+          address: createChangeset({
+            data: address,
+            changes: { line: newAddress.line }
+          })
+        }
+      })
+    )
+
+    expect(
+      castAssoc(
+        { change: changeAddress, field: 'address' },
+        { line: newAddress.line, city: '' },
+        changeset
+      )
+    ).toEqual(
+      createChangeset({
+        data: { address },
+        valid: false,
+        changes: {
+          address: createChangeset({
+            data: address,
+            changes: { line: newAddress.line, city: '' },
+            errors: { city: ['error'] },
+            valid: false
+          })
+        }
+      })
+    )
   })
 })
 

@@ -13,9 +13,9 @@ var {
 
 describe('pick', function() {
   it('should pick expected attributes', function() {
-    var stub = { author: 'jacek', title: 'title', body: 'body' }
+    var stub = { author: 'jacek', title: 'title', body: '' }
     var result = pick(['title', 'body', 'active'], stub)
-    expect(result).toEqual({ title: 'title', body: 'body' })
+    expect(result).toEqual({ title: 'title', body: '' })
   })
 })
 
