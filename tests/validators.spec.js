@@ -105,7 +105,7 @@ describe('required', function() {
         },
         changeset
       )
-    ).toBeInvalid({ emptyString: errors, undefined: errors })
+    ).toBeInvalid({ emptyString: errors, undefined: errors, null: errors })
   })
 
   it('should allow for custom error message', function() {

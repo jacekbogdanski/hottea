@@ -8,7 +8,8 @@ var {
   getErrors,
   merge,
   view,
-  castAssoc
+  castAssoc,
+  traverseErrors
 } = require('../lib/changeset')
 
 var { required } = require('../lib/validators')
@@ -65,7 +66,7 @@ describe('castAssoc', function() {
     expect(
       castAssoc(
         { change: changeAddress, field: 'address' },
-        { line: newAddress.line, city: '' },
+        { line: newAddress.line, city: null },
         changeset
       )
     ).toEqual(
@@ -75,13 +76,44 @@ describe('castAssoc', function() {
         changes: {
           address: createChangeset({
             data: address,
-            changes: { line: newAddress.line, city: '' },
+            changes: { line: newAddress.line, city: null },
             errors: { city: ['error'] },
             valid: false
           })
         }
       })
     )
+  })
+})
+
+describe('traverseErrors', function() {
+  var changeset = createChangeset({
+    errors: { username: ['required'] },
+    valid: false,
+    changes: {
+      username: null,
+      address: createChangeset({
+        changes: { city: 'n' },
+        errors: { city: ['too short'] },
+        valid: false
+      })
+    }
+  })
+
+  it('without callback should give errors from changeset and associations', function() {
+    expect(traverseErrors(changeset)).toEqual({
+      username: ['required'],
+      address: { city: ['too short'] }
+    })
+  })
+
+  it('with callback should give formatted errors from changeset and associations', function() {
+    expect(
+      traverseErrors(changeset, (field, error) => `${field}: ${error}`)
+    ).toEqual({
+      username: ['username: required'],
+      address: { city: ['city: too short'] }
+    })
   })
 })
 
