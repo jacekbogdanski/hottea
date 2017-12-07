@@ -77,7 +77,7 @@ describe('castAssoc', function() {
           address: createChangeset({
             data: address,
             changes: { line: newAddress.line, city: null },
-            errors: { city: ['error'] },
+            errors: { city: [{ message: 'error', validation: 'required' }] },
             valid: false
           })
         }
@@ -210,8 +210,9 @@ describe('getErrors', function() {
 describe('putError', function() {
   it('should put error into changeset', function() {
     var changeset = createChangeset()
-    expect(putError('change', 'error', changeset)).toEqual(
-      createChangeset({ errors: { change: ['error'] }, valid: false })
+    var error = { message: 'error', validation: 'test' }
+    expect(putError('change', error, changeset)).toEqual(
+      createChangeset({ errors: { change: [error] }, valid: false })
     )
   })
 })
