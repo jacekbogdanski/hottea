@@ -8,7 +8,8 @@ var {
   merge,
   castAssoc,
   traverseErrors,
-  applyChanges
+  applyChanges,
+  deleteChange
 } = require('../lib/changeset')
 
 var { required } = require('../lib/validators')
@@ -218,6 +219,30 @@ describe('applyChanges', function() {
       id: 1,
       title: 'title',
       author: { name: 'jacek' }
+    })
+  })
+})
+
+describe('deleteChange', function() {
+  it('with valid change should delete change from changeset', function() {
+    var changeset = cast({}, { title: 'title', body: 'body' }, [
+      'title',
+      'body'
+    ])
+    expect(deleteChange('title', changeset)).toMatchObject({
+      changes: { body: 'body' },
+      errors: {}
+    })
+  })
+
+  it('with invalid change should delete change and error from changeset', function() {
+    var changeset = required(
+      { fields: ['body'] },
+      cast({}, { title: 'title' }, ['title'])
+    )
+    expect(deleteChange('body', changeset)).toMatchObject({
+      changes: { title: 'title' },
+      errors: {}
     })
   })
 })
