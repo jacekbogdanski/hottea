@@ -1,4 +1,3 @@
-var { createChangeset } = require('./helpers')
 var {
   cast,
   getChange,
@@ -7,7 +6,6 @@ var {
   putError,
   getErrors,
   merge,
-  view,
   castAssoc,
   traverseErrors
 } = require('../lib/changeset')
@@ -38,7 +36,7 @@ describe('castAssoc', function() {
   }
   var address = { line: '123 Main St', city: 'New York' }
   var newAddress = { line: '456 Main St', city: 'New York' }
-  var changeset = createChangeset({ data: { address } })
+  var changeset = cast({ address }, {}, ['line', 'city'])
 
   it('should give correct changeset', function() {
     expect(
@@ -51,17 +49,17 @@ describe('castAssoc', function() {
         newAddress,
         changeset
       )
-    ).toEqual(
-      createChangeset({
-        data: { address },
-        changes: {
-          address: createChangeset({
-            data: address,
-            changes: { line: newAddress.line }
-          })
+    ).toMatchObject({
+      data: { address },
+      valid: true,
+      changes: {
+        address: {
+          data: address,
+          changes: { line: newAddress.line },
+          valid: true
         }
-      })
-    )
+      }
+    })
 
     expect(
       castAssoc(
@@ -69,41 +67,42 @@ describe('castAssoc', function() {
         { line: newAddress.line, city: null },
         changeset
       )
-    ).toEqual(
-      createChangeset({
-        data: { address },
-        valid: false,
-        changes: {
-          address: createChangeset({
-            data: address,
-            changes: { line: newAddress.line, city: null },
-            errors: { city: [{ message: 'error', validation: 'required' }] },
-            valid: false
-          })
+    ).toMatchObject({
+      data: { address },
+      valid: false,
+      changes: {
+        address: {
+          data: address,
+          changes: { line: newAddress.line, city: null },
+          errors: { city: [{ message: 'error', validation: 'required' }] },
+          valid: false
         }
-      })
-    )
+      }
+    })
   })
 })
 
 describe('traverseErrors', function() {
-  var changeset = createChangeset({
-    errors: { username: [{ message: 'required' }] },
-    valid: false,
-    changes: {
-      username: null,
-      address: createChangeset({
-        changes: { city: 'n' },
-        errors: { city: [{ message: 'too short' }] },
-        valid: false
-      })
-    }
-  })
+  var changeset = required(
+    { fields: ['username'], message: 'required' },
+    cast({}, {}, ['username'])
+  )
+  var changeAddress = (data, attrs) =>
+    required(
+      { fields: ['line', 'city'], message: 'required' },
+      cast(data, attrs, ['line', 'city'])
+    )
+
+  changeset = castAssoc(
+    { field: 'address', change: changeAddress },
+    { line: '123 Main St' },
+    changeset
+  )
 
   it('without callback should give errors from changeset and associations', function() {
     expect(traverseErrors(changeset)).toEqual({
       username: ['required'],
-      address: { city: ['too short'] }
+      address: { city: ['required'] }
     })
   })
 
@@ -112,7 +111,7 @@ describe('traverseErrors', function() {
       traverseErrors(changeset, (field, error) => `${field}: ${error.message}`)
     ).toEqual({
       username: ['username: required'],
-      address: { city: ['city: too short'] }
+      address: { city: ['city: required'] }
     })
   })
 })
@@ -120,30 +119,27 @@ describe('traverseErrors', function() {
 describe('merge', function() {
   it('with same data should merge two changesets', function() {
     var data = { id: 1 }
-    var changeset1 = createChangeset({
-      data,
-      changes: { title: 'title', body: 'body' },
-      errors: { title: ['too short'], rules: ['error'] },
-      valid: false
-    })
-    var changeset2 = createChangeset({
-      data,
-      changes: { title: 'new title' },
-      errors: { rules: ['error'] },
-      valid: false
-    })
+    var fields = ['title', 'body']
 
-    expect(merge(changeset1, changeset2)).toEqual({
-      data: { id: 1 },
-      changes: { title: 'new title', body: 'body' },
-      errors: { rules: ['error'] },
+    var changeset1 = required(
+      { fields, message: 'required' },
+      cast(data, {}, fields)
+    )
+    var changeset2 = required(
+      { fields, message: 'required' },
+      cast(data, { title: 'new title' }, fields)
+    )
+    expect(merge(changeset1, changeset2)).toMatchObject({
+      data,
+      changes: { title: 'new title', body: null },
+      errors: { body: [{ message: 'required' }] },
       valid: false
     })
   })
 
   it('with different data should throw', function() {
-    var changeset1 = createChangeset({ data: { id: 1 } })
-    var changeset2 = createChangeset({ data: { id: 2 } })
+    var changeset1 = cast({ id: 1 }, {}, [])
+    var changeset2 = cast({ id: 2 }, {}, [])
 
     expect(() => merge(changeset1, changeset2)).toThrow()
   })
@@ -151,133 +147,59 @@ describe('merge', function() {
 
 describe('getChange', function() {
   it('with change should give change from changeset', function() {
-    var changeset = createChangeset({ changes: { change: 'change' } })
+    var changeset = cast({}, { change: 'change' }, ['change'])
     expect(getChange('change', changeset)).toEqual('change')
   })
 
   it('without change should give nothing', function() {
-    var changeset = createChangeset()
+    var changeset = cast({}, {}, [])
     expect(getChange('change', changeset)).toEqual(undefined)
   })
 })
 
 describe('putChange', function() {
   it('should put change into changeset', function() {
-    expect(
-      putChange(
-        'title',
-        'new title',
-        createChangeset({ changes: { body: 'body' } })
-      )
-    ).toEqual(
-      createChangeset({ changes: { title: 'new title', body: 'body' } })
-    )
+    expect(putChange('title', 'new title', cast({}, {}, []))).toMatchObject({
+      changes: { title: 'new title' }
+    })
 
     expect(
-      putChange(
-        'title',
-        'new title',
-        createChangeset({ changes: { title: 'title' } })
-      )
-    ).toEqual(createChangeset({ changes: { title: 'new title' } }))
+      putChange('title', 'new title', cast({}, { title: 'title' }, ['title']))
+    ).toMatchObject({ changes: { title: 'new title' } })
   })
 })
 
 describe('getData', function() {
   it('with data should give data from changeset', function() {
-    var changeset = createChangeset({ data: { data: 'data' } })
-    expect(getData('data', changeset)).toEqual('data')
+    expect(getData('data', cast({ data: 'data' }, {}, []))).toEqual('data')
   })
 
   it('without data should give nothing', function() {
-    var changeset = createChangeset()
-    expect(getData('data', changeset)).toEqual(undefined)
+    expect(getData('data', cast({}, {}, []))).toEqual(undefined)
   })
 })
 
 describe('getErrors', function() {
   it('with errors should give errors from changeset', function() {
-    var changeset = createChangeset({ errors: { title: ['invalid'] } })
-    expect(getErrors('title', changeset)).toEqual(['invalid'])
+    var changeset = required(
+      { fields: ['title'], message: 'required' },
+      cast({}, {}, ['title'])
+    )
+    expect(getErrors('title', changeset)).toEqual([
+      { message: 'required', validation: 'required' }
+    ])
   })
 
   it('without errors should give nothing', function() {
-    var changeset = createChangeset()
-    expect(getErrors('title', changeset)).toEqual([])
+    expect(getErrors('title', cast({}, {}, []))).toEqual([])
   })
 })
 
 describe('putError', function() {
   it('should put error into changeset', function() {
-    var changeset = createChangeset()
     var error = { message: 'error', validation: 'test' }
-    expect(putError('change', error, changeset)).toEqual(
-      createChangeset({ errors: { change: [error] }, valid: false })
-    )
-  })
-})
-
-describe('view', function() {
-  it('should give correct changeset view', function() {
-    expect(
-      view(
-        createChangeset({
-          data: { id: 1, title: 'old title' },
-          changes: { title: 'new title' },
-          errors: {}
-        })
-      )
-    ).toEqual({
-      id: { value: 1, errors: [] },
-      title: { value: 'new title', errors: [] },
-      __valid__: true
-    })
-
-    expect(
-      view(
-        createChangeset({
-          data: { id: 1, title: 'old title', author: 'jacek' },
-          changes: { title: 'new title' },
-          errors: { body: ['is required'] },
-          valid: false
-        })
-      )
-    ).toEqual({
-      id: { value: 1, errors: [] },
-      title: { value: 'new title', errors: [] },
-      body: { value: null, errors: ['is required'] },
-      author: { value: 'jacek', errors: [] },
-      __valid__: false
-    })
-
-    expect(
-      view(
-        createChangeset({
-          data: { id: 1, title: 'title' },
-          changes: { body: 'body' },
-          errors: {}
-        }),
-        ['title', 'body']
-      )
-    ).toEqual({
-      title: { value: 'title', errors: [] },
-      body: { value: 'body', errors: [] },
-      __valid__: true
-    })
-
-    expect(
-      view(
-        createChangeset({
-          data: { id: 1, title: 'old title' },
-          changes: { title: 'new title', body: 'body' },
-          errors: { body: ['too short'] },
-          valid: false
-        }),
-        ['title']
-      )
-    ).toEqual({
-      title: { value: 'new title', errors: [] },
-      __valid__: false
+    expect(putError('change', error, cast({}, {}, []))).toMatchObject({
+      errors: { change: [error] }
     })
   })
 })
