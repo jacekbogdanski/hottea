@@ -7,7 +7,8 @@ var {
   getErrors,
   merge,
   castAssoc,
-  traverseErrors
+  traverseErrors,
+  applyChanges
 } = require('../lib/changeset')
 
 var { required } = require('../lib/validators')
@@ -200,6 +201,23 @@ describe('putError', function() {
     var error = { message: 'error', validation: 'test' }
     expect(putError('change', error, cast({}, {}, []))).toMatchObject({
       errors: { change: [error] }
+    })
+  })
+})
+
+describe('applyChanges', function() {
+  it('should give data view from changeset and associations', function() {
+    var changeset = cast({ id: 1 }, { title: 'title' }, ['title'])
+    changeset = castAssoc(
+      { field: 'author', change: (data, attrs) => cast(data, attrs, ['name']) },
+      { name: 'jacek' },
+      changeset
+    )
+
+    expect(applyChanges(changeset)).toEqual({
+      id: 1,
+      title: 'title',
+      author: { name: 'jacek' }
     })
   })
 })
