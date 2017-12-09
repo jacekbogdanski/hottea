@@ -152,12 +152,12 @@ describe('merge', function() {
 describe('getChange', function() {
   it('with change should give change from changeset', function() {
     var changeset = cast({}, { change: 'change' }, ['change'])
-    expect(getChange('change', changeset)).toEqual('change')
+    expect(getChange('change', changeset)).toEqual([true, 'change'])
   })
 
   it('without change should give nothing', function() {
     var changeset = cast({}, {}, [])
-    expect(getChange('change', changeset)).toEqual(undefined)
+    expect(getChange('change', changeset)).toEqual([false, null])
   })
 })
 
@@ -175,11 +175,14 @@ describe('putChange', function() {
 
 describe('getField', function() {
   it('with data should give data from changeset', function() {
-    expect(getField('data', cast({ data: 'data' }, {}, []))).toEqual('data')
+    expect(getField('data', cast({ data: 'data' }, {}, []))).toEqual([
+      true,
+      'data'
+    ])
   })
 
   it('without data should give nothing', function() {
-    expect(getField('data', cast({}, {}, []))).toEqual(undefined)
+    expect(getField('data', cast({}, {}, []))).toEqual([false, null])
   })
 })
 
