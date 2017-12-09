@@ -2,7 +2,7 @@ var {
   cast,
   getChange,
   putChange,
-  getData,
+  getField,
   putError,
   getErrors,
   merge,
@@ -171,13 +171,13 @@ describe('putChange', function() {
   })
 })
 
-describe('getData', function() {
+describe('getField', function() {
   it('with data should give data from changeset', function() {
-    expect(getData('data', cast({ data: 'data' }, {}, []))).toEqual('data')
+    expect(getField('data', cast({ data: 'data' }, {}, []))).toEqual('data')
   })
 
   it('without data should give nothing', function() {
-    expect(getData('data', cast({}, {}, []))).toEqual(undefined)
+    expect(getField('data', cast({}, {}, []))).toEqual(undefined)
   })
 })
 
