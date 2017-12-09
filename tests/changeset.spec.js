@@ -9,7 +9,8 @@ var {
   castAssoc,
   traverseErrors,
   applyChanges,
-  deleteChange
+  deleteChange,
+  applyAction
 } = require('../lib/changeset')
 
 var { required } = require('../lib/validators')
@@ -26,7 +27,8 @@ describe('cast', function() {
       data: { username: 'jacek', email: 'old@email.com' },
       changes: { email: 'new@email.com' },
       errors: {},
-      valid: true
+      valid: true,
+      action: null
     })
   })
 })
@@ -244,5 +246,28 @@ describe('deleteChange', function() {
       changes: { title: 'title' },
       errors: {}
     })
+  })
+})
+
+describe('applyAction', function() {
+  it('with valid changeset should apply changes and action to changeset data', function() {
+    var changeset = cast({ id: 1 }, { title: 'title' }, ['title'])
+    expect(applyAction(changeset, 'INSERT')).toMatchObject([
+      true,
+      {
+        data: { id: 1, title: 'title' },
+        changes: {},
+        valid: true,
+        action: 'INSERT'
+      }
+    ])
+  })
+
+  it('with invalid changeset should give error result', function() {
+    var changeset = required(
+      { fields: ['title'] },
+      cast({ id: 1 }, {}, ['title'])
+    )
+    expect(applyAction(changeset, 'INSERT')).toEqual([false, changeset])
   })
 })
