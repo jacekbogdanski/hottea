@@ -1,7 +1,7 @@
 {
   "name": "jubjub",
   "version": "0.0.1",
-  "description": "Model validation engine.",
+  "description": "Model validation lib.",
   "main": "index.js",
   "author": "Jacek Bogdański <jacek@codepeak.io>",
   "license": "MIT",
