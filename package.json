@@ -1,8 +1,8 @@
 {
   "name": "hottea",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Hottea will validate your data models in browser and nodejs.",
-  "main": "index.js",
+  "main": "./lib/hottea.js",
   "author": "Jacek Bogdański <jacek@codepeak.io>",
   "homepage": "https://jacekbogdanski.github.io/hottea",
   "keywords": [
