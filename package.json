@@ -1,9 +1,28 @@
 {
-  "name": "jubjub",
+  "name": "hottea",
   "version": "0.0.1",
-  "description": "Model validation lib.",
+  "description": "Hottea will validate your data entities.",
   "main": "index.js",
   "author": "Jacek Bogdański <jacek@codepeak.io>",
+  "homepage": "https://jacekbogdanski.github.io/hottea",
+  "keywords": [
+    "validation",
+    "validate",
+    "valid",
+    "model",
+    "entity",
+    "changeset",
+    "change",
+    "data"
+  ],
+  "bugs": {
+    "url": "https://github.com/jacekbogdanski/hottea/issues",
+    "email": "jacek@codepeak.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jacekbogdanski/hottea"
+  },
   "license": "MIT",
   "scripts": {
     "test": "jest"

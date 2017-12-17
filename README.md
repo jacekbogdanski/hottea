@@ -1,4 +1,6 @@
-Jubjub has been created to separate data management in business and data layers in a functional programming way.
+# Hottea
+
+Hottea has been created to separate data management in business and data layers in a functional programming way.
 It allows for manipulating, validation and association handling of the business entities and at the same time keeping advantages of data immutability.
 
 Example:
@@ -44,4 +46,9 @@ equal(changeset, {
 })
 ```
 
-See [online documentation](https://jacekbogdanski.github.io/jubjub/) for more.
+See [online documentation](https://jacekbogdanski.github.io/hottea/) for more.
+
+# Tests
+```
+npm run test
+```
