@@ -37,7 +37,7 @@ equal(changeset, {
   data: entity,
   changes: { title: 'new title', rules: false },
   errors: {
-    title: [{ message: "can't be blank", validation: 'required' }],
+    body: [{ message: "can't be blank", validation: 'required' }],
     rules: [{ message: 'is required', validation: 'acceptance' }]
   },
   valid: false
