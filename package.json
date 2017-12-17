@@ -1,7 +1,7 @@
 {
   "name": "hottea",
   "version": "0.0.1",
-  "description": "Hottea will validate your data entities.",
+  "description": "Hottea will validate your data models in browser and nodejs.",
   "main": "index.js",
   "author": "Jacek Bogdański <jacek@codepeak.io>",
   "homepage": "https://jacekbogdanski.github.io/hottea",
