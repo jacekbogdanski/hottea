@@ -467,6 +467,214 @@ newChangeset.action === 'INSERT'</code></pre>
 
 
 <div class="description">
+    Casts association with the changeset parameters.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">entity model data</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>attrs</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">changes</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>params</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">changes to pick</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="changeset.js.html">changeset.js</a>, <a href="changeset.js.html#line37">line 37</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    changeset
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>cast({id: 1, title: 'title'}, {title: 'new title', body: 'body'}, ['title', 'body'])</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".cast"><span class="type-signature">(static) </span>cast<span class="signature">(data, attrs, params)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
     Applies properties as changes for the data model according to the set of keys.
 </div>
 
@@ -667,7 +875,7 @@ newChangeset.action === 'INSERT'</code></pre>
     
 
     
-    <h4 class="name" id=".cast"><span class="type-signature">(static) </span>cast<span class="signature">(data, attrs, params)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id=".change"><span class="type-signature">(static) </span>change<span class="signature">(change, changeset, attrs)</span><span class="type-signature"></span></h4>
     
 
     
@@ -675,7 +883,7 @@ newChangeset.action === 'INSERT'</code></pre>
 
 
 <div class="description">
-    Casts association with the changeset parameters.
+    Applies changes to the given changeset.
 </div>
 
 
@@ -711,7 +919,30 @@ newChangeset.action === 'INSERT'</code></pre>
 
         <tr>
             
-                <td class="name"><code>data</code></td>
+                <td class="name"><code>change</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">cast function with signature (data:{Object}, attrs:{Object}) -> changeset</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>changeset</code></td>
             
 
             <td class="type">
@@ -727,7 +958,7 @@ newChangeset.action === 'INSERT'</code></pre>
 
             
 
-            <td class="description last">entity model data</td>
+            <td class="description last">target changeset</td>
         </tr>
 
     
@@ -750,30 +981,7 @@ newChangeset.action === 'INSERT'</code></pre>
 
             
 
-            <td class="description last">changes</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>params</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">changes to pick</td>
+            <td class="description last">changes to apply</td>
         </tr>
 
     
@@ -814,7 +1022,7 @@ newChangeset.action === 'INSERT'</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="changeset.js.html">changeset.js</a>, <a href="changeset.js.html#line37">line 37</a>
+        <a href="changeset.js.html">changeset.js</a>, <a href="changeset.js.html#line186">line 186</a>
     </li></ul></dd>
     
 
@@ -837,35 +1045,8 @@ newChangeset.action === 'INSERT'</code></pre>
 
 
 
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    changeset
-</div>
 
 
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Object</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>cast({id: 1, title: 'title'}, {title: 'new title', body: 'body'}, ['title', 'body'])</code></pre>
 
 
 
@@ -2373,14 +2554,13 @@ Changes, errors and action are merged into the second changeset.
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="changeset.html">changeset</a></li><li><a href="validators.html">validators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#changememberofchangeset">change
-memberof changeset</a></li><li><a href="global.html#from">from</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="changeset.html">changeset</a></li><li><a href="validators.html">validators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#from">from</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Dec 18 2017 13:49:08 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Dec 18 2017 14:00:29 GMT+0100 (CET)
 </footer>
 
 <script> prettyPrint(); </script>
