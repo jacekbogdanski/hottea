@@ -10,7 +10,8 @@ var {
   traverseErrors,
   applyChanges,
   deleteChange,
-  applyAction
+  applyAction,
+  change
 } = require('../lib/changeset')
 
 var { required } = require('../lib/validators')
@@ -272,5 +273,25 @@ describe('applyAction', function() {
       cast({ id: 1 }, {}, ['title'])
     )
     expect(applyAction(changeset, 'INSERT')).toEqual([false, changeset])
+  })
+})
+
+describe('change', function() {
+  it('should apply changes to the given changeset', function() {
+    var changeset = cast({ id: 1 }, { title: 'title', body: 'body' }, [
+      'title',
+      'body'
+    ])
+
+    var newChangeset = change(
+      (data, attrs) => cast(data, attrs, ['title', 'body']),
+      changeset,
+      { title: 'new title' }
+    )
+
+    expect(newChangeset).toMatchObject({
+      data: { id: 1 },
+      changes: { title: 'new title', body: 'body' }
+    })
   })
 })
